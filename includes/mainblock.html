@@ -1,0 +1,26 @@
+<section class="row banner">
+	<p>
+		This site is written in <a href="http://www.golang.org">Go</a>.
+		It uses JSON to fetch and parse this data from
+		<a href="https://github.com/conformal/btcd">btcd</a> on-demand.
+	</p>
+</section>
+<section class="row">
+<table class="responsive" cellpadding="3" cellspacing="0" width="100%">
+<tr>
+	<th>Number</th>
+	<th>Hash</th>
+	<th>Time</th>
+	<th>Transactions</th>
+	<th>Size (kB)</th>
+</tr>
+{{range .}}
+<tr>
+        <td><a href="/block/{{.Hash}}">{{.Height}}</a></td>
+        <td><a href="/block/{{.Hash}}">{{.DisplayHash}}</a></td>
+        <td>{{.Timestamp}}</td>
+        <td>{{.Txs}}</td>
+        <td>{{.Size}}</td>
+</tr>
+{{end}}
+</table>
