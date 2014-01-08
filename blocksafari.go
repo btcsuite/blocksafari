@@ -21,11 +21,13 @@ const (
 )
 
 func handleBlock(w http.ResponseWriter, r *http.Request) {
-	blockhash := r.URL.Path[len("/block/"):]
-	if len(blockhash) < 1 {
-		return
-	}
-	b, err := getBlock(blockhash)
+	blockhash := r.URL.Path[len("/block"):]
+	if len(blockhash) < 2 || len(blockhash[1:]) != 64 {
+                printErrorPage(w, "Invalid block hash")
+                return
+        }
+
+	b, err := getBlock(blockhash[1:])
 	if err != nil {
 		fmt.Fprintf(w, "%v", err)
 		return
@@ -46,11 +48,12 @@ func handleBlock(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleBlockNum(w http.ResponseWriter, r *http.Request) {
-	blocknum := r.URL.Path[len("/b/"):]
-	if len(blocknum) < 1 {
+	blocknum := r.URL.Path[len("/b"):]
+	if len(blocknum) < 2 {
 		return
 	}
 
+	blocknum = blocknum[1:]
 	b, err := strconv.Atoi(blocknum)
 	if err != nil {
 		fmt.Fprintf(w, "invalid block number: %v", blocknum)
@@ -68,21 +71,21 @@ func handleBlockNum(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleCSS(w http.ResponseWriter, r *http.Request) {
-	file := r.URL.Path[len("/css/"):]
-	if len(file) < 1 {
+	file := r.URL.Path[len("/css"):]
+	if len(file) < 2 {
 		return
 	}
 
-	http.ServeFile(w, r, "css/"+file)
+	http.ServeFile(w, r, "css/"+file[1:])
 }
 
 func handleJS(w http.ResponseWriter, r *http.Request) {
-	file := r.URL.Path[len("/js/"):]
-	if len(file) < 1 {
+	file := r.URL.Path[len("/js"):]
+	if len(file) < 2 {
 		return
 	}
 
-	http.ServeFile(w, r, "js/"+file)
+	http.ServeFile(w, r, "js/"+file[1:])
 }
 
 func handleMain(w http.ResponseWriter, r *http.Request) {
@@ -113,13 +116,13 @@ func handleMain(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleRawBlock(w http.ResponseWriter, r *http.Request) {
-	block := r.URL.Path[len("/rawblock/"):]
-	if len(block) != 64 {
+	block := r.URL.Path[len("/rawblock"):]
+	if len(block) < 2 || len(block[1:]) != 64 {
 		printErrorPage(w, "Invalid block hash")
 		return
 	}
 
-	output, err := getRawBlock(block)
+	output, err := getRawBlock(block[1:])
 	if err != nil {
 		printErrorPage(w, "Block not found")
 		return
@@ -130,13 +133,13 @@ func handleRawBlock(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleRawTx(w http.ResponseWriter, r *http.Request) {
-	tx := r.URL.Path[len("/rawtx/"):]
-	if len(tx) != 64 {
+	tx := r.URL.Path[len("/rawtx"):]
+	if len(tx) < 2 || len(tx[1:]) != 64 {
 		printErrorPage(w, "Invalid transaction id")
 		return
 	}
 
-	output, err := getRawTx(tx)
+	output, err := getRawTx(tx[1:])
 	if err != nil {
 		printErrorPage(w, "Transaction not found")
 		return
@@ -147,10 +150,11 @@ func handleRawTx(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleSearch(w http.ResponseWriter, r *http.Request) {
-	q := r.URL.Path[len("/search/"):]
-	if len(q) < 1 {
+	q := r.URL.Path[len("/search"):]
+	if len(q) < 2 {
 		return
 	}
+	q = q[1:]
 	if len(q) == 64 {
 		uri := fmt.Sprintf("http://%v/block/%v", r.Host, q)
 		w.Header().Set("Location", uri)
@@ -166,12 +170,12 @@ func handleSearch(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleTx(w http.ResponseWriter, r *http.Request) {
-	tx := r.URL.Path[len("/tx/"):]
-	if len(tx) < 1 {
+	tx := r.URL.Path[len("/tx"):]
+	if len(tx) < 2 {
 		printErrorPage(w, "Invalid TX hash")
 		return
 	}
-	t, err := getTx(tx)
+	t, err := getTx(tx[1:])
 	if err != nil {
 		printErrorPage(w, "Unable to retrieve tx")
 		return
