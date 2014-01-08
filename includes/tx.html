@@ -30,7 +30,13 @@
 	<td>&nbsp;</td>
 	<td>&nbsp;</td>
 	<td>&nbsp;</td>
-	<td><span class="hash">{{.ScriptSig.Asm}}</span></td>
+	<td><span class="hash">
+		{{if .Coinbase}}
+			{{ .Coinbase}}
+		{{else}}
+			{{.ScriptSig.Asm}}
+		{{end}}
+	</span></td>
 	</tr>
 {{end}}
 </table>
