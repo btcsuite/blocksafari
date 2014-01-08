@@ -41,9 +41,10 @@ type displayMainPage struct {
 }
 
 type displayTxPage struct {
-	Hash string
-	Vin  []btcjson.Vin
-	Vout []btcjson.Vout
+	Hash   string
+	Vin    []btcjson.Vin
+	Vout   []btcjson.Vout
+	BtcOut string
 }
 
 type ErrMsg struct {
@@ -142,10 +143,15 @@ func printMainBlock(w http.ResponseWriter, block []btcjson.BlockResult) {
 }
 
 func printTx(w http.ResponseWriter, tx btcjson.TxRawResult) {
+	var btcOut float64
+	for _, v := range tx.Vout {
+		btcOut += v.Value
+	}
 	display := &displayTxPage{
-		Hash: tx.Txid,
-		Vin:  tx.Vin,
-		Vout: tx.Vout,
+		Hash:   tx.Txid,
+		Vin:    tx.Vin,
+		Vout:   tx.Vout,
+		BtcOut: fmt.Sprintf("%.8f", btcOut),
 	}
 	err := templates.ExecuteTemplate(w, "tx.html", display)
 	if err != nil {

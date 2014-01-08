@@ -23,9 +23,9 @@ const (
 func handleBlock(w http.ResponseWriter, r *http.Request) {
 	blockhash := r.URL.Path[len("/block"):]
 	if len(blockhash) < 2 || len(blockhash[1:]) != 64 {
-                printErrorPage(w, "Invalid block hash")
-                return
-        }
+		printErrorPage(w, "Invalid block hash")
+		return
+	}
 
 	b, err := getBlock(blockhash[1:])
 	if err != nil {
