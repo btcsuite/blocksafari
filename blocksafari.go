@@ -81,21 +81,21 @@ func handleJS(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleMain(w http.ResponseWriter, r *http.Request) {
-	nblocks, err := getBlockCount()
+	bestBlock, err := getBestBlockHash()
 	if err != nil {
-		printErrorPage(w, "Unable to get block count")
+		printErrorPage(w, "Unable to get best blockhash")
 		return
 	}
 
 	blocks := make([]btcjson.BlockResult, numMainPageBlocks)
-	for j := 0; j < numMainPageBlocks; j++ {
-		cblock := int64(int(nblocks) - j)
-		jstr, err := getBlockHash(cblock)
-		if err != nil {
-			printErrorPage(w, "Error retrieving block hash")
-			return
-		}
-		blocks[j], err = getBlock(jstr, true)
+	blocks[0], err = getBlock(bestBlock, true)
+	if err != nil {
+		printErrorPage(w, "Error retrieving block")
+		return
+	}
+
+	for j := 1; j < numMainPageBlocks && blocks[j-1].PreviousHash != ""; j++ {
+		blocks[j], err = getBlock(blocks[j-1].PreviousHash, true)
 		if err != nil {
 			printErrorPage(w, "Error retrieving block")
 			return

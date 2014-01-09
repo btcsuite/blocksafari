@@ -21,6 +21,28 @@ type Tx struct {
 	addresses [][]string // addresses
 }
 
+func getBestBlockHash() (string, error) {
+	cmd, err := btcjson.NewGetBestBlockHashCmd("blocksafari")
+	if err != nil {
+		return "", err
+	}
+
+	msg, err := json.Marshal(cmd)
+	if err != nil {
+		return "", err
+	}
+
+	reply, err := btcjson.TlsRpcCommand(cfg.RPCUser, cfg.RPCPassword, cfg.RPCServer, msg, pem, false)
+	if err != nil {
+		return "", err
+	}
+	if reply.Error != nil {
+		return "", reply.Error
+	}
+
+	return reply.Result.(string), nil
+}
+
 func getBlock(block string, withTx bool) (btcjson.BlockResult, error) {
 	var result btcjson.BlockResult
 
