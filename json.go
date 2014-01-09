@@ -6,7 +6,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/conformal/btcjson"
 )
 
@@ -35,12 +34,16 @@ func getBlock(block string, withTx bool) (btcjson.BlockResult, error) {
 		return result, err
 	}
 
-	b, err := btcjson.TlsRpcCommand(cfg.RPCUser, cfg.RPCPassword, cfg.RPCServer, msg, pem, false)
+	reply, err := btcjson.TlsRpcCommand(cfg.RPCUser, cfg.RPCPassword, cfg.RPCServer, msg, pem, false)
 	if err != nil {
 		return result, err
 	}
-	result = b.Result.(btcjson.BlockResult)
-	return result, nil
+
+	if reply.Error != nil {
+		return result, reply.Error
+	}
+
+	return reply.Result.(btcjson.BlockResult), nil
 }
 
 func getBlockCount() (float64, error) {
@@ -58,13 +61,12 @@ func getBlockCount() (float64, error) {
 	if err != nil {
 		return -1, err
 	}
-	if reply.Result == nil {
-		err := fmt.Errorf("No data returned.")
-		return -1, err
+
+	if reply.Error != nil {
+		return -1, reply.Error
 	}
 
-	r := reply.Result.(float64)
-	return r, nil
+	return reply.Result.(float64), nil
 }
 
 func getBlockHash(idx int64) (string, error) {
@@ -82,12 +84,12 @@ func getBlockHash(idx int64) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if reply.Result == nil {
-		err := fmt.Errorf("No data returned.")
-		return "", err
+
+	if reply.Error != nil {
+		return "", reply.Error
 	}
-	r := reply.Result.(string)
-	return r, nil
+
+	return reply.Result.(string), nil
 }
 
 func getRawBlock(block string) (interface{}, error) {
@@ -105,9 +107,9 @@ func getRawBlock(block string) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	if reply.Result == nil {
-		err := fmt.Errorf("No data returned.")
-		return nil, err
+
+	if reply.Error != nil {
+		return nil, reply.Error
 	}
 
 	return reply.Result, nil
@@ -130,13 +132,12 @@ func getTx(tx string) (btcjson.TxRawResult, error) {
 	if err != nil {
 		return result, err
 	}
-	if reply.Error != nil {
-		err := fmt.Errorf("No data returned.")
-		return result, err
-	}
-	result = reply.Result.(btcjson.TxRawResult)
 
-	return result, nil
+	if reply.Error != nil {
+		return result, reply.Error
+	}
+
+	return reply.Result.(btcjson.TxRawResult), nil
 }
 
 func getRawTx(tx string) (interface{}, error) {
@@ -154,9 +155,9 @@ func getRawTx(tx string) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	if reply.Result == nil {
-		err := fmt.Errorf("No data returned.")
-		return nil, err
+
+	if reply.Error != nil {
+		return nil, reply.Error
 	}
 
 	return reply.Result, nil

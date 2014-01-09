@@ -61,12 +61,12 @@ type blockPageTx struct {
 func printBlock(w http.ResponseWriter, block btcjson.BlockResult, trans []btcjson.TxRawResult) {
 	tmpTime := time.Unix(block.Time, 0)
 	txs := make([]blockPageTx, len(trans))
-	for i := range trans {
+	for i, tran := range trans {
 		txs[i] = blockPageTx{
-			DisplayHash: fmt.Sprintf("%s", trans[i].Txid)[:10],
-			Hash:        trans[i].Txid,
-			Vin:         trans[i].Vin,
-			Vout:        trans[i].Vout,
+			DisplayHash: fmt.Sprintf("%s", tran.Txid)[:10],
+			Hash:        tran.Txid,
+			Vin:         tran.Vin,
+			Vout:        tran.Vout,
 		}
 	}
 
@@ -122,17 +122,17 @@ func printHTMLHeader(w http.ResponseWriter, title string) {
 	}
 }
 
-func printMainBlock(w http.ResponseWriter, block []btcjson.BlockResult) {
-	display := make([]displayMainPage, len(block))
-	for i := range block {
-		tmpTime := time.Unix(block[i].Time, 0)
+func printMainBlock(w http.ResponseWriter, blocks []btcjson.BlockResult) {
+	display := make([]displayMainPage, len(blocks))
+	for i, block := range blocks {
+		tmpTime := time.Unix(block.Time, 0)
 		display[i] = displayMainPage{
-			DisplayHash: fmt.Sprintf("%s", strings.TrimLeft(block[i].Hash, "0"))[:10],
-			Hash:        block[i].Hash,
-			Height:      block[i].Height,
-			Size:        fmt.Sprintf("%0.3f", float64(block[i].Size)/1000.00),
+			DisplayHash: fmt.Sprintf("%s", strings.TrimLeft(block.Hash, "0"))[:10],
+			Hash:        block.Hash,
+			Height:      block.Height,
+			Size:        fmt.Sprintf("%0.3f", float64(block.Size)/1000.00),
 			Timestamp:   fmt.Sprintf("%s", tmpTime.String()[:19]),
-			Txs:         len(block[i].Tx),
+			Txs:         len(block.Tx),
 		}
 	}
 
