@@ -63,7 +63,7 @@ func printBlock(w http.ResponseWriter, block btcjson.BlockResult, trans []btcjso
 	txs := make([]blockPageTx, len(trans))
 	for i := range trans {
 		txs[i] = blockPageTx{
-			DisplayHash: fmt.Sprintf("%s", block.Tx[i])[:10],
+			DisplayHash: fmt.Sprintf("%s", trans[i].Txid)[:10],
 			Hash:        trans[i].Txid,
 			Vin:         trans[i].Vin,
 			Vout:        trans[i].Vout,

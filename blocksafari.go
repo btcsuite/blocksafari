@@ -27,23 +27,15 @@ func handleBlock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	b, err := getBlock(blockhash[1:])
+	b, err := getBlock(blockhash[1:], true)
 	if err != nil {
 		fmt.Fprintf(w, "%v", err)
 		return
 	}
 
-	tx := make([]btcjson.TxRawResult, len(b.Tx))
-	for i := range b.Tx {
-		tx[i], err = getTx(b.Tx[i])
-		if err != nil {
-			break
-		}
-	}
-
 	title := fmt.Sprintf("Block %v", b.Height)
 	printHTMLHeader(w, title)
-	printBlock(w, b, tx)
+	printBlock(w, b, b.RawTx)
 	printHTMLFooter(w)
 }
 
@@ -103,7 +95,7 @@ func handleMain(w http.ResponseWriter, r *http.Request) {
 			printErrorPage(w, "Error retrieving block hash")
 			return
 		}
-		blocks[j], err = getBlock(jstr)
+		blocks[j], err = getBlock(jstr, false)
 		if err != nil {
 			printErrorPage(w, "Error retrieving block")
 			return

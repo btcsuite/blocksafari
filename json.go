@@ -22,10 +22,10 @@ type Tx struct {
 	addresses [][]string // addresses
 }
 
-func getBlock(block string) (btcjson.BlockResult, error) {
+func getBlock(block string, withTx bool) (btcjson.BlockResult, error) {
 	var result btcjson.BlockResult
 
-	cmd, err := btcjson.NewGetBlockCmd("blocksafari", block)
+	cmd, err := btcjson.NewGetBlockCmd("blocksafari", block, true, withTx)
 	if err != nil {
 		return result, err
 	}
