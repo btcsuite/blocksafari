@@ -38,6 +38,7 @@ type displayMainPage struct {
 	Size        string
 	Timestamp   string
 	Txs         int
+	TotalBTC    string
 }
 
 type displayTxPage struct {
@@ -125,6 +126,12 @@ func printHTMLHeader(w http.ResponseWriter, title string) {
 func printMainBlock(w http.ResponseWriter, blocks []btcjson.BlockResult) {
 	display := make([]displayMainPage, len(blocks))
 	for i, block := range blocks {
+		var totalBtc float64
+		for _, tx := range block.RawTx {
+			for _, v := range tx.Vout {
+				totalBtc += v.Value
+			}
+		}
 		tmpTime := time.Unix(block.Time, 0)
 		display[i] = displayMainPage{
 			DisplayHash: fmt.Sprintf("%s", strings.TrimLeft(block.Hash, "0"))[:10],
@@ -132,7 +139,8 @@ func printMainBlock(w http.ResponseWriter, blocks []btcjson.BlockResult) {
 			Height:      block.Height,
 			Size:        fmt.Sprintf("%0.3f", float64(block.Size)/1000.00),
 			Timestamp:   fmt.Sprintf("%s", tmpTime.String()[:19]),
-			Txs:         len(block.Tx),
+			Txs:         len(block.RawTx),
+			TotalBTC:    fmt.Sprintf("%.8f", totalBtc),
 		}
 	}
 

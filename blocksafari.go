@@ -95,7 +95,7 @@ func handleMain(w http.ResponseWriter, r *http.Request) {
 			printErrorPage(w, "Error retrieving block hash")
 			return
 		}
-		blocks[j], err = getBlock(jstr, false)
+		blocks[j], err = getBlock(jstr, true)
 		if err != nil {
 			printErrorPage(w, "Error retrieving block")
 			return

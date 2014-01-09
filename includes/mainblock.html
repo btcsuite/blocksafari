@@ -12,6 +12,7 @@
 	<th>Hash</th>
 	<th>Time</th>
 	<th>Transactions</th>
+	<th>Total BTC</th>
 	<th>Size (kB)</th>
 </tr>
 {{range .}}
@@ -20,7 +21,8 @@
         <td><a href="/block/{{.Hash}}">{{.DisplayHash}}</a></td>
         <td>{{.Timestamp}}</td>
         <td>{{.Txs}}</td>
-        <td>{{.Size}}</td>
+        <td>{{.TotalBTC}}</td>
+	<td>{{.Size}}</td>
 </tr>
 {{end}}
 </table>
