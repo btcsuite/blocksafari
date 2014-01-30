@@ -140,7 +140,7 @@ func getRawBlock(block string) (interface{}, error) {
 func getTx(tx string) (btcjson.TxRawResult, error) {
 	var result btcjson.TxRawResult
 
-	cmd, err := btcjson.NewGetRawTransactionCmd("blocksafari", tx, true)
+	cmd, err := btcjson.NewGetRawTransactionCmd("blocksafari", tx, 1)
 	if err != nil {
 		return result, err
 	}
@@ -163,7 +163,7 @@ func getTx(tx string) (btcjson.TxRawResult, error) {
 }
 
 func getRawTx(tx string) (interface{}, error) {
-	cmd, err := btcjson.NewGetRawTransactionCmd("blocksafari", tx, true)
+	cmd, err := btcjson.NewGetRawTransactionCmd("blocksafari", tx, 1)
 	if err != nil {
 		return nil, err
 	}
