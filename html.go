@@ -152,15 +152,15 @@ func printMainBlock(w http.ResponseWriter, blocks []*btcjson.BlockResult) {
 }
 
 func printTx(w http.ResponseWriter, tx *btcjson.TxRawResult) {
-	var btcOut float64
+	var totalBtc float64
 	for _, v := range tx.Vout {
-		btcOut += v.Value
+		totalBtc += v.Value
 	}
 	display := &displayTxPage{
 		Hash:   tx.Txid,
 		Vin:    tx.Vin,
 		Vout:   tx.Vout,
-		BtcOut: fmt.Sprintf("%.8f", btcOut),
+		BtcOut: fmt.Sprintf("%.8f", totalBtc),
 	}
 	err := templates.ExecuteTemplate(w, "tx.html", display)
 	if err != nil {
