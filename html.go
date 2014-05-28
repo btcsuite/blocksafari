@@ -59,7 +59,7 @@ type blockPageTx struct {
 	Vout        []btcjson.Vout
 }
 
-func printBlock(w http.ResponseWriter, block btcjson.BlockResult, trans []btcjson.TxRawResult) {
+func printBlock(w http.ResponseWriter, block *btcjson.BlockResult, trans []btcjson.TxRawResult) {
 	tmpTime := time.Unix(block.Time, 0)
 	txs := make([]blockPageTx, len(trans))
 	for i, tran := range trans {
@@ -123,7 +123,7 @@ func printHTMLHeader(w http.ResponseWriter, title string) {
 	}
 }
 
-func printMainBlock(w http.ResponseWriter, blocks []btcjson.BlockResult) {
+func printMainBlock(w http.ResponseWriter, blocks []*btcjson.BlockResult) {
 	display := make([]displayMainPage, len(blocks))
 	for i, block := range blocks {
 		var totalBtc float64
@@ -133,6 +133,7 @@ func printMainBlock(w http.ResponseWriter, blocks []btcjson.BlockResult) {
 			}
 		}
 		tmpTime := time.Unix(block.Time, 0)
+
 		display[i] = displayMainPage{
 			DisplayHash: fmt.Sprintf("%s", strings.TrimLeft(block.Hash, "0"))[:10],
 			Hash:        block.Hash,
@@ -150,7 +151,7 @@ func printMainBlock(w http.ResponseWriter, blocks []btcjson.BlockResult) {
 	}
 }
 
-func printTx(w http.ResponseWriter, tx btcjson.TxRawResult) {
+func printTx(w http.ResponseWriter, tx *btcjson.TxRawResult) {
 	var btcOut float64
 	for _, v := range tx.Vout {
 		btcOut += v.Value

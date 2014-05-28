@@ -7,7 +7,10 @@ package main
 import (
 	"fmt"
 	"github.com/conformal/btcjson"
+	"github.com/conformal/btcrpcclient"
+	"github.com/conformal/btcwire"
 	"github.com/davecgh/go-spew/spew"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -20,6 +23,10 @@ const (
 	numMainPageBlocks = 20 // number of blocks to display on main page
 )
 
+var (
+	client *btcrpcclient.Client
+)
+
 func handleBlock(w http.ResponseWriter, r *http.Request) {
 	blockhash := r.URL.Path[len("/block"):]
 	if len(blockhash) < 2 || len(blockhash[1:]) != 64 {
@@ -27,15 +34,21 @@ func handleBlock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	b, err := getBlock(blockhash[1:], true)
+	sha, err := btcwire.NewShaHashFromStr(blockhash[1:])
 	if err != nil {
 		fmt.Fprintf(w, "%v", err)
 		return
 	}
 
-	title := fmt.Sprintf("Block %v", b.Height)
+	block, err := client.GetBlockVerbose(sha, true)
+	if err != nil {
+		fmt.Fprintf(w, "%v", err)
+		return
+	}
+
+	title := fmt.Sprintf("Block %v", block.Height)
 	printHTMLHeader(w, title)
-	printBlock(w, b, b.RawTx)
+	printBlock(w, block, block.RawTx)
 	printHTMLFooter(w)
 }
 
@@ -52,12 +65,12 @@ func handleBlockNum(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hash, err := getBlockHash(int64(b))
+	hash, err := client.GetBlockHash(int64(b))
 	if err != nil {
 		fmt.Fprintf(w, "%v", err)
 		return
 	}
-	uri := fmt.Sprintf("http://%v/block/%v", r.Host, hash)
+	uri := fmt.Sprintf("http://%v/block/%v", r.Host, hash.String())
 	w.Header().Set("Location", uri)
 	w.WriteHeader(307)
 }
@@ -81,21 +94,22 @@ func handleJS(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleMain(w http.ResponseWriter, r *http.Request) {
-	bestBlock, err := getBestBlockHash()
+	sha, err := client.GetBestBlockHash()
 	if err != nil {
 		printErrorPage(w, "Unable to get best blockhash")
 		return
 	}
 
-	blocks := make([]btcjson.BlockResult, numMainPageBlocks)
-	blocks[0], err = getBlock(bestBlock, true)
+	blocks := make([]*btcjson.BlockResult, numMainPageBlocks)
+	blocks[0], err = client.GetBlockVerbose(sha, true)
 	if err != nil {
 		printErrorPage(w, "Error retrieving block")
 		return
 	}
 
 	for j := 1; j < numMainPageBlocks && blocks[j-1].PreviousHash != ""; j++ {
-		blocks[j], err = getBlock(blocks[j-1].PreviousHash, true)
+		prevsha, _ := btcwire.NewShaHashFromStr(blocks[j-1].PreviousHash)
+		blocks[j], err = client.GetBlockVerbose(prevsha, true)
 		if err != nil {
 			printErrorPage(w, "Error retrieving block")
 			return
@@ -109,12 +123,17 @@ func handleMain(w http.ResponseWriter, r *http.Request) {
 
 func handleRawBlock(w http.ResponseWriter, r *http.Request) {
 	block := r.URL.Path[len("/rawblock"):]
-	if len(block) < 2 || len(block[1:]) != 64 {
+	if len(block) < 2 {
 		printErrorPage(w, "Invalid block hash")
 		return
 	}
 
-	output, err := getRawBlock(block[1:])
+	sha, err := btcwire.NewShaHashFromStr(block[1:])
+	if err != nil {
+		printErrorPage(w, "Invalid block hash")
+		return
+	}
+	output, err := client.GetBlock(sha)
 	if err != nil {
 		printErrorPage(w, "Block not found")
 		return
@@ -126,12 +145,18 @@ func handleRawBlock(w http.ResponseWriter, r *http.Request) {
 
 func handleRawTx(w http.ResponseWriter, r *http.Request) {
 	tx := r.URL.Path[len("/rawtx"):]
-	if len(tx) < 2 || len(tx[1:]) != 64 {
-		printErrorPage(w, "Invalid transaction id")
+	if len(tx) < 2 {
+		printErrorPage(w, "Invalid transaction sha")
 		return
 	}
 
-	output, err := getRawTx(tx[1:])
+	sha, err := btcwire.NewShaHashFromStr(tx[1:])
+	if err != nil {
+		printErrorPage(w, "Invalid transaction sha")
+		return
+	}
+
+	output, err := client.GetRawTransactionVerbose(sha)
 	if err != nil {
 		printErrorPage(w, "Transaction not found")
 		return
@@ -167,7 +192,13 @@ func handleTx(w http.ResponseWriter, r *http.Request) {
 		printErrorPage(w, "Invalid TX hash")
 		return
 	}
-	t, err := getTx(tx[1:])
+	sha, err := btcwire.NewShaHashFromStr(tx[1:])
+	if err != nil {
+		printErrorPage(w, "Invalid TX hash")
+		return
+	}
+
+	t, err := client.GetRawTransactionVerbose(sha)
 	if err != nil {
 		printErrorPage(w, "Unable to retrieve tx")
 		return
@@ -226,6 +257,24 @@ func main() {
 			os.Exit(-1)
 		}
 		listeners = append(listeners, listener)
+	}
+
+	cert, err := ioutil.ReadFile(cfg.RPCCert)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to load certificate: %v\n", err)
+		os.Exit(-1)
+	}
+	rpccfg := btcrpcclient.ConnConfig{
+		Host:         cfg.RPCServer,
+		Endpoint:     "ws",
+		User:         cfg.RPCUser,
+		Pass:         cfg.RPCPassword,
+		Certificates: cert,
+	}
+	client, err = btcrpcclient.New(&rpccfg, nil)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "New RPC Client failed: %v\n", err)
+		os.Exit(-1)
 	}
 
 	http.HandleFunc("/", handleRequest)
