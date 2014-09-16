@@ -48,6 +48,7 @@ type displayTxPage struct {
 	BtcOut string
 }
 
+// ErrMsg struct to hold the string from an error for display.
 type ErrMsg struct {
 	ErrMsg string
 }
