@@ -5,11 +5,12 @@
 package main
 
 import (
-	"github.com/conformal/btcutil"
-	"github.com/conformal/go-flags"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/conformal/btcutil"
+	"github.com/conformal/go-flags"
 )
 
 // config defines the configuration options for blocksafari.

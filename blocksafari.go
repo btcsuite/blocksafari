@@ -6,10 +6,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/conformal/btcjson"
-	"github.com/conformal/btcrpcclient"
-	"github.com/conformal/btcwire"
-	"github.com/davecgh/go-spew/spew"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -17,6 +13,11 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/conformal/btcjson"
+	"github.com/conformal/btcrpcclient"
+	"github.com/conformal/btcwire"
+	"github.com/davecgh/go-spew/spew"
 )
 
 const (

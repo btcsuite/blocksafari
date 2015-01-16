@@ -6,11 +6,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/conformal/btcjson"
 	"html/template"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/conformal/btcjson"
 )
 
 var (
