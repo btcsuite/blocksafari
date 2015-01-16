@@ -9,7 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/conformal/btcutil"
+	"github.com/btcsuite/btcutil"
 	"github.com/conformal/go-flags"
 )
 
