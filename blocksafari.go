@@ -15,8 +15,8 @@ import (
 	"sync"
 
 	"github.com/btcsuite/btcrpcclient"
+	"github.com/btcsuite/btcwire"
 	"github.com/conformal/btcjson"
-	"github.com/conformal/btcwire"
 	"github.com/davecgh/go-spew/spew"
 )
 
