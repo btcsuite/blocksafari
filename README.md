@@ -1,7 +1,7 @@
 blocksafari
 ===========
 
-blocksafari is a web-based frontend to the blockchain in [btcd](https://github.com/conformal/btcd).
+blocksafari is a web-based frontend to the blockchain in [btcd](https://github.com/btcsuite/btcd).
 
 **blocksafari is proof-of-concept code from our early work with
   btcd.**
