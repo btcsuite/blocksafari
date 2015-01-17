@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/conformal/btcjson"
+	"github.com/btcsuite/btcjson"
 )
 
 var (
