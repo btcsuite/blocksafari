@@ -14,9 +14,9 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcjson"
 	"github.com/btcsuite/btcrpcclient"
-	"github.com/btcsuite/btcwire"
 	"github.com/davecgh/go-spew/spew"
 )
 
@@ -35,7 +35,7 @@ func handleBlock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sha, err := btcwire.NewShaHashFromStr(blockhash[1:])
+	sha, err := wire.NewShaHashFromStr(blockhash[1:])
 	if err != nil {
 		fmt.Fprintf(w, "%v", err)
 		return
@@ -109,7 +109,7 @@ func handleMain(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for j := 1; j < numMainPageBlocks && blocks[j-1].PreviousHash != ""; j++ {
-		prevsha, _ := btcwire.NewShaHashFromStr(blocks[j-1].PreviousHash)
+		prevsha, _ := wire.NewShaHashFromStr(blocks[j-1].PreviousHash)
 		blocks[j], err = client.GetBlockVerbose(prevsha, true)
 		if err != nil {
 			printErrorPage(w, "Error retrieving block")
@@ -129,7 +129,7 @@ func handleRawBlock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sha, err := btcwire.NewShaHashFromStr(block[1:])
+	sha, err := wire.NewShaHashFromStr(block[1:])
 	if err != nil {
 		printErrorPage(w, "Invalid block hash")
 		return
@@ -151,7 +151,7 @@ func handleRawTx(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sha, err := btcwire.NewShaHashFromStr(tx[1:])
+	sha, err := wire.NewShaHashFromStr(tx[1:])
 	if err != nil {
 		printErrorPage(w, "Invalid transaction sha")
 		return
@@ -193,7 +193,7 @@ func handleTx(w http.ResponseWriter, r *http.Request) {
 		printErrorPage(w, "Invalid TX hash")
 		return
 	}
-	sha, err := btcwire.NewShaHashFromStr(tx[1:])
+	sha, err := wire.NewShaHashFromStr(tx[1:])
 	if err != nil {
 		printErrorPage(w, "Invalid TX hash")
 		return
