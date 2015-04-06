@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/btcsuite/btcd/btcjson"
+	"github.com/btcsuite/btcd/btcjson/v2/btcjson"
 )
 
 var (
@@ -61,7 +61,7 @@ type blockPageTx struct {
 	Vout        []btcjson.Vout
 }
 
-func printBlock(w http.ResponseWriter, block *btcjson.BlockResult, trans []btcjson.TxRawResult) {
+func printBlock(w http.ResponseWriter, block *btcjson.GetBlockVerboseResult, trans []btcjson.TxRawResult) {
 	tmpTime := time.Unix(block.Time, 0)
 	txs := make([]blockPageTx, len(trans))
 	for i, tran := range trans {
@@ -125,7 +125,7 @@ func printHTMLHeader(w http.ResponseWriter, title string) {
 	}
 }
 
-func printMainBlock(w http.ResponseWriter, blocks []*btcjson.BlockResult) {
+func printMainBlock(w http.ResponseWriter, blocks []*btcjson.GetBlockVerboseResult) {
 	display := make([]displayMainPage, len(blocks))
 	for i, block := range blocks {
 		var totalBtc float64

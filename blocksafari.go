@@ -14,7 +14,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/btcsuite/btcd/btcjson"
+	"github.com/btcsuite/btcd/btcjson/v2/btcjson"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcrpcclient"
 	"github.com/davecgh/go-spew/spew"
@@ -101,7 +101,7 @@ func handleMain(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	blocks := make([]*btcjson.BlockResult, numMainPageBlocks)
+	blocks := make([]*btcjson.GetBlockVerboseResult, numMainPageBlocks)
 	blocks[0], err = client.GetBlockVerbose(sha, true)
 	if err != nil {
 		printErrorPage(w, "Error retrieving block")
