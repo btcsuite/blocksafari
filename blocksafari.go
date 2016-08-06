@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Conformal Systems LLC.
+// Copyright (c) 2013-2016 Conformal Systems LLC.
 // Use of this source code is governed by an ISC
 // license that can be found in the LICENSE file.
 
@@ -15,7 +15,7 @@ import (
 	"sync"
 
 	"github.com/btcsuite/btcd/btcjson"
-	"github.com/btcsuite/btcd/wire"
+	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcrpcclient"
 	"github.com/davecgh/go-spew/spew"
 )
@@ -35,13 +35,13 @@ func handleBlock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sha, err := wire.NewShaHashFromStr(blockhash[1:])
+	hash, err := chainhash.NewHashFromStr(blockhash[1:])
 	if err != nil {
 		fmt.Fprintf(w, "%v", err)
 		return
 	}
 
-	block, err := client.GetBlockVerbose(sha, true)
+	block, err := client.GetBlockVerbose(hash, true)
 	if err != nil {
 		fmt.Fprintf(w, "%v", err)
 		return
@@ -95,22 +95,22 @@ func handleJS(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleMain(w http.ResponseWriter, r *http.Request) {
-	sha, err := client.GetBestBlockHash()
+	hash, err := client.GetBestBlockHash()
 	if err != nil {
 		printErrorPage(w, "Unable to get best blockhash")
 		return
 	}
 
 	blocks := make([]*btcjson.GetBlockVerboseResult, numMainPageBlocks)
-	blocks[0], err = client.GetBlockVerbose(sha, true)
+	blocks[0], err = client.GetBlockVerbose(hash, true)
 	if err != nil {
 		printErrorPage(w, "Error retrieving block")
 		return
 	}
 
 	for j := 1; j < numMainPageBlocks && blocks[j-1].PreviousHash != ""; j++ {
-		prevsha, _ := wire.NewShaHashFromStr(blocks[j-1].PreviousHash)
-		blocks[j], err = client.GetBlockVerbose(prevsha, true)
+		prevhash, _ := chainhash.NewHashFromStr(blocks[j-1].PreviousHash)
+		blocks[j], err = client.GetBlockVerbose(prevhash, true)
 		if err != nil {
 			printErrorPage(w, "Error retrieving block")
 			return
@@ -129,12 +129,12 @@ func handleRawBlock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sha, err := wire.NewShaHashFromStr(block[1:])
+	hash, err := chainhash.NewHashFromStr(block[1:])
 	if err != nil {
 		printErrorPage(w, "Invalid block hash")
 		return
 	}
-	output, err := client.GetBlock(sha)
+	output, err := client.GetBlock(hash)
 	if err != nil {
 		printErrorPage(w, "Block not found")
 		return
@@ -147,17 +147,17 @@ func handleRawBlock(w http.ResponseWriter, r *http.Request) {
 func handleRawTx(w http.ResponseWriter, r *http.Request) {
 	tx := r.URL.Path[len("/rawtx"):]
 	if len(tx) < 2 {
-		printErrorPage(w, "Invalid transaction sha")
+		printErrorPage(w, "Invalid transaction hash")
 		return
 	}
 
-	sha, err := wire.NewShaHashFromStr(tx[1:])
+	hash, err := chainhash.NewHashFromStr(tx[1:])
 	if err != nil {
-		printErrorPage(w, "Invalid transaction sha")
+		printErrorPage(w, "Invalid transaction hash")
 		return
 	}
 
-	output, err := client.GetRawTransactionVerbose(sha)
+	output, err := client.GetRawTransactionVerbose(hash)
 	if err != nil {
 		printErrorPage(w, "Transaction not found")
 		return
@@ -193,13 +193,13 @@ func handleTx(w http.ResponseWriter, r *http.Request) {
 		printErrorPage(w, "Invalid TX hash")
 		return
 	}
-	sha, err := wire.NewShaHashFromStr(tx[1:])
+	hash, err := chainhash.NewHashFromStr(tx[1:])
 	if err != nil {
 		printErrorPage(w, "Invalid TX hash")
 		return
 	}
 
-	t, err := client.GetRawTransactionVerbose(sha)
+	t, err := client.GetRawTransactionVerbose(hash)
 	if err != nil {
 		printErrorPage(w, "Unable to retrieve tx")
 		return
